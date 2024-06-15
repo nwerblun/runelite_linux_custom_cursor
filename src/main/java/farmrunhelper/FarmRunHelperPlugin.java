@@ -41,7 +41,8 @@ public class FarmRunHelperPlugin extends Plugin
 	{
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Farm Run Helper says " + config.greeting(), null);
+//			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Farm Run Helper says " + config.greeting(), null);
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Farm Run Helper is up ", null);
 		}
 	}
 
