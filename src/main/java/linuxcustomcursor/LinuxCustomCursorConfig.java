@@ -1,4 +1,4 @@
-package farmrunhelper;
+package linuxcustomcursor;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
@@ -8,8 +8,8 @@ import net.runelite.client.config.Keybind;
 
 import java.awt.event.KeyEvent;
 
-@ConfigGroup("farmrunhelper")
-public interface FarmRunHelperConfig extends Config
+@ConfigGroup("linuxcustomcursor")
+public interface LinuxCustomCursorConfig extends Config
 {
 
 	@ConfigSection(
@@ -22,8 +22,8 @@ public interface FarmRunHelperConfig extends Config
 	@ConfigItem(
 		position = 1,
 		keyName = "hotkeyactivation",
-		name = "Hotkey Activation (disables auto-overlay)",
-		description = "Activate the overlay via hotkey\nNote that this will disable automatic overlay starting",
+		name = "Hotkey Activation<br>(disables auto-overlay)",
+		description = "Activate the overlay via hotkey<br>Note that this will disable automatic overlay starting",
 		section = generalSection
 	)
 	default boolean hotkeyActivationKeybindEnable()
@@ -40,7 +40,7 @@ public interface FarmRunHelperConfig extends Config
 	)
 	default Keybind hotkeyActivationKeybind()
 	{
-	return new Keybind(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK);
+		return new Keybind(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK);
 	}
 
 	@ConfigSection(

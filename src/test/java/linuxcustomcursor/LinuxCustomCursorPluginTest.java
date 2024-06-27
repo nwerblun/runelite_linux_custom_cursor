@@ -1,13 +1,13 @@
-package farmrunhelper;
+package linuxcustomcursor;
 
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 
-public class FarmRunHelperPluginTest
+public class LinuxCustomCursorPluginTest
 {
 	public static void main(String[] args) throws Exception
 	{
-		ExternalPluginManager.loadBuiltin(FarmRunHelperPlugin.class);
+		ExternalPluginManager.loadBuiltin(LinuxCustomCursorPlugin.class);
 		RuneLite.main(args);
 	}
 }

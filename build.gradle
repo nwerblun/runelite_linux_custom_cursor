@@ -23,7 +23,7 @@ dependencies {
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
-group = 'farmrunhelper'
+group = 'linuxcustomcursor'
 version = '1.0-SNAPSHOT'
 
 tasks.withType(JavaCompile) {
