@@ -1,27 +1,32 @@
 package linuxcustomcursor;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import javax.inject.Inject;
-import net.runelite.api.Client;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.*;
+import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
-import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPanel;
-import net.runelite.client.ui.overlay.components.LineComponent;
-import net.runelite.client.ui.overlay.components.TitleComponent;
+import net.runelite.client.ui.overlay.OverlayUtil;
 
-class LinuxCustomCursorOverlay extends OverlayPanel
+@Slf4j
+class LinuxCustomCursorOverlay extends Overlay
 {
     private final Client client;
     private final LinuxCustomCursorConfig config;
     private final LinuxCustomCursorPlugin plugin;
 
+    @Setter
+    private BufferedImage cursorImg;
+
     @Inject
     private LinuxCustomCursorOverlay(Client client, LinuxCustomCursorConfig config, LinuxCustomCursorPlugin plugin)
     {
-        setPosition(OverlayPosition.TOP_LEFT);
-        setLayer(OverlayLayer.ABOVE_WIDGETS);
+        super(plugin);
+        setPriority(Overlay.PRIORITY_HIGHEST);
+        setLayer(OverlayLayer.ALWAYS_ON_TOP);
         this.client = client;
         this.config = config;
         this.plugin = plugin;
@@ -30,40 +35,12 @@ class LinuxCustomCursorOverlay extends OverlayPanel
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        if (!plugin.isCurrentlyActive())
+        if (cursorImg != null && client.getMouseCanvasPosition() != null)
         {
-            return null;
+            Point adjustedLoc = new Point(client.getMouseCanvasPosition().getX(),
+                    client.getMouseCanvasPosition().getY() - LinuxCustomCursorPlugin.CURSOR_HEIGHT/2);
+            OverlayUtil.renderImageLocation(graphics, adjustedLoc, cursorImg);
         }
-        // TODO: Add logic to check if the required stuff is in inv/equipped
-        // If not, add an else to this that renders it as red
-        panelComponent.getChildren().add(TitleComponent.builder()
-                .text("Getting Materials")
-                .color(Color.RED)
-                .build()
-        );
-
-        panelComponent.getChildren().add(LineComponent.builder()
-                .left("hoes")
-                .right("none at all")
-                .build()
-        );
-
-        if (config.enableTreeRun())
-        {
-            if (plugin.playerHasEnoughTreeSaplings())
-            {
-                panelComponent.getChildren().add(LineComponent.builder()
-                        .left("Tree Saplings")
-                        .right("none at all")
-                        .build()
-                );
-            }
-            else
-            {
-
-            }
-        }
-
-        return super.render(graphics);
+        return null;
     }
 }
