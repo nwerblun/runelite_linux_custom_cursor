@@ -6,6 +6,10 @@ making the cursor transparent. It technically works on all platforms, but other 
 There will be a small delay between the image rendering and the actual "cursor" movement. 
 This delay is pretty unnoticeable in my testing, however.
 
+### Setting a Custom Cursor
+Place a file called "cursor.png" into ~/.runelite on OSX/Linux or into %userprofile%\.runelite\ on Windows. This file 
+will be used when "Custom Cursor" is selected in the plugin.
+
 ### Extra Cursors
 A number of additional pre-made cursors are also included and the custom cursor/equipped weapon features 
 from the original are also implemented.

@@ -1,7 +1,7 @@
 package linuxcustomcursor;
 
 import javax.inject.Inject;
-
+import java.awt.Rectangle;
 import com.google.inject.Provides;
 import net.runelite.api.Client;
 import net.runelite.api.events.CanvasSizeChanged;
@@ -15,8 +15,6 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.customcursor.CustomCursorPlugin;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.game.ItemManager;
-
-import java.awt.*;
 
 
 @PluginDescriptor(
@@ -64,12 +62,13 @@ public class LinuxCustomCursorPlugin extends Plugin
 	@Subscribe
 	public void onFocusChanged(FocusChanged f)
 	{
-        overlay.setDisableOverlay(!f.isFocused() || client.getGameState() != GameState.LOGGED_IN);
+		overlay.setDisableOverlay(!f.isFocused() || client.getGameState() != GameState.LOGGED_IN);
 	}
 
 	@Subscribe
 	public void onCanvasSizeChanged(CanvasSizeChanged event)
 	{
+		// Unsure if needed. Just guaranteeing that the canvas size is always up-to-date.
 		overlay.setBounds(new Rectangle(client.getCanvasWidth(), client.getCanvasHeight()));
 	}
 

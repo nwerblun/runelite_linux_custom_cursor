@@ -1,6 +1,7 @@
 package linuxcustomcursor;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
@@ -10,9 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.Point;
 import net.runelite.client.RuneLite;
-import net.runelite.client.callback.ClientThread;
-import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.Overlay;
@@ -26,7 +24,6 @@ class LinuxCustomCursorOverlay extends Overlay
     private final LinuxCustomCursorConfig config;
     private final LinuxCustomCursorPlugin plugin;
     private final ClientUI clientUI;
-    private final ClientThread clientThread;
     private final ItemManager itemManager;
 
     @Setter
@@ -34,8 +31,7 @@ class LinuxCustomCursorOverlay extends Overlay
 
     @Inject
     private LinuxCustomCursorOverlay(Client client, LinuxCustomCursorConfig config,
-                                     LinuxCustomCursorPlugin plugin, ClientUI clientUI,
-                                     ClientThread clientThread, ItemManager itemManager)
+                                     LinuxCustomCursorPlugin plugin, ClientUI clientUI, ItemManager itemManager)
     {
         super(plugin);
         setPriority(Overlay.PRIORITY_HIGHEST);
@@ -44,7 +40,6 @@ class LinuxCustomCursorOverlay extends Overlay
         this.config = config;
         this.plugin = plugin;
         this.clientUI = clientUI;
-        this.clientThread = clientThread;
         this.itemManager = itemManager;
         disableOverlay = false;
     }
@@ -56,7 +51,6 @@ class LinuxCustomCursorOverlay extends Overlay
         Point mouseLoc = client.getMouseCanvasPosition();
         if (disableOverlay || mouseLoc == null || !mouseInsideBounds(mouseLoc) || cursorImg == null)
         {
-
             clientUI.resetCursor();
             return null;
         }

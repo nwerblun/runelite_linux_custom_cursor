@@ -3,8 +3,6 @@ package linuxcustomcursor;
 import lombok.Getter;
 import javax.annotation.Nullable;
 import java.awt.image.BufferedImage;
-import java.awt.Toolkit;
-import java.awt.Dimension;
 import net.runelite.client.plugins.customcursor.CustomCursorPlugin;
 import net.runelite.client.util.ImageUtil;
 
@@ -51,6 +49,7 @@ public enum LinuxCustomCursor
     {
         this.name = name;
         this.notInOriginal = notInOriginal;
+        // '/' is needed in the image path or it won't be able to find the resources.
         if (notInOriginal) this.cursorImage = ImageUtil.loadImageResource(LinuxCustomCursorPlugin.class, "/" + icon);
         else this.cursorImage = ImageUtil.loadImageResource(CustomCursorPlugin.class, icon);
     }

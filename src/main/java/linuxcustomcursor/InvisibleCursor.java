@@ -1,7 +1,7 @@
 package linuxcustomcursor;
 
-import net.runelite.client.util.ImageUtil;
 import java.awt.image.BufferedImage;
+import net.runelite.client.util.ImageUtil;
 
 
 public class InvisibleCursor
