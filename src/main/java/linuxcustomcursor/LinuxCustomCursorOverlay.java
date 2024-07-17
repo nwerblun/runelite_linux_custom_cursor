@@ -61,9 +61,7 @@ class LinuxCustomCursorOverlay extends Overlay
             return null;
         }
 
-
-        Point renderPt = getAdjustedMousePoint(mouseLoc);
-        OverlayUtil.renderImageLocation(graphics, renderPt, cursorImg);
+        OverlayUtil.renderImageLocation(graphics, getAdjustedMousePoint(mouseLoc), cursorImg);
 
         if (!config.debugEnableDrawSystemCursor())
         {
@@ -73,7 +71,6 @@ class LinuxCustomCursorOverlay extends Overlay
         {
             clientUI.resetCursor();
         }
-        revalidate();
         return null;
     }
 
