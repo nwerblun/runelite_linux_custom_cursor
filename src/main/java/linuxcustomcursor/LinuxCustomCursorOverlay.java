@@ -15,6 +15,7 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
+import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 
 @Slf4j
@@ -36,6 +37,11 @@ class LinuxCustomCursorOverlay extends Overlay
         super(plugin);
         setPriority(Overlay.PRIORITY_HIGHEST);
         setLayer(OverlayLayer.ALWAYS_ON_TOP);
+        setMovable(false);
+        setResettable(false);
+        setResizable(false);
+        setSnappable(false);
+        setPreferredPosition(OverlayPosition.DYNAMIC);
         this.client = client;
         this.config = config;
         this.plugin = plugin;
@@ -55,7 +61,9 @@ class LinuxCustomCursorOverlay extends Overlay
             return null;
         }
 
-        OverlayUtil.renderImageLocation(graphics, getAdjustedMousePoint(mouseLoc), cursorImg);
+
+        Point renderPt = getAdjustedMousePoint(mouseLoc);
+        OverlayUtil.renderImageLocation(graphics, renderPt, cursorImg);
 
         if (!config.debugEnableDrawSystemCursor())
         {
@@ -65,6 +73,7 @@ class LinuxCustomCursorOverlay extends Overlay
         {
             clientUI.resetCursor();
         }
+        revalidate();
         return null;
     }
 
@@ -121,7 +130,6 @@ class LinuxCustomCursorOverlay extends Overlay
         return mouseLoc.getX() > 0 && mouseLoc.getX() <= client.getCanvasWidth() &&
                 mouseLoc.getY() > 0 && mouseLoc.getY() <= client.getCanvasHeight();
     }
-
 
     private Point getAdjustedMousePoint(Point mouseLoc)
     {
