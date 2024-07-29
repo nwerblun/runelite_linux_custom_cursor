@@ -1,22 +1,19 @@
 package linuxcustomcursor;
 
 import javax.inject.Inject;
-import java.awt.Rectangle;
 import com.google.inject.Provides;
 import net.runelite.api.Client;
-import net.runelite.api.events.BeforeRender;
-import net.runelite.api.events.CanvasSizeChanged;
 import net.runelite.api.events.FocusChanged;
 import net.runelite.api.GameState;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.customcursor.CustomCursorPlugin;
+import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.game.ItemManager;
-
 
 @PluginDescriptor(
 	name = "Linux Custom Cursor",
@@ -39,7 +36,7 @@ public class LinuxCustomCursorPlugin extends Plugin
 	private OverlayManager overlayManager;
 
 	@Inject
-	private ItemManager itemManager;
+	private ClientUI clientUI;
 
 
 	@Override
@@ -63,6 +60,14 @@ public class LinuxCustomCursorPlugin extends Plugin
 	@Subscribe
 	public void onFocusChanged(FocusChanged f)
 	{
-		overlay.setDisableOverlay(!f.isFocused() || client.getGameState() != GameState.LOGGED_IN);
+		overlay.setDisableOverlay(!f.isFocused());
+		if (!f.isFocused()) clientUI.resetCursor();
+	}
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged e)
+	{
+		overlay.setDisableOverlay(e.getGameState() != GameState.LOGGED_IN);
+		if (e.getGameState() != GameState.LOGGED_IN) clientUI.resetCursor();
 	}
 }

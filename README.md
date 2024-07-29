@@ -1,4 +1,6 @@
 # Changelog
+#### 1.0.4
+* Fixed a bug where logging out would keep your cursor invisible. Cursor should now properly reset until logged back in.
 #### 1.0.3
 * Cursor was getting moved when other overlays were active. Adjusted the image to be "dynamic" so its location is independent of other overlays.
   * This could mean your hotspot adjustment will change quite a bit. Recalibration likely needed by the user.
