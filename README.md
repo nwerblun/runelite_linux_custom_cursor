@@ -1,3 +1,12 @@
+# Changelog
+#### 1.0.3
+* Cursor was getting moved when other overlays were active. Adjusted the image to be "dynamic" so its location is independent of other overlays.
+  * This could mean your hotspot adjustment will change quite a bit. Recalibration likely needed by the user.
+* Removed some unused code
+#### 1.0.1/1.0.2
+* I failed at getting the formatting correct to submit this plugin to RuneLite. Just updating version numbers, gradle config and cleaning up formatting.
+
+
 # Linux Custom Cursor
 Java has an issue where all cursors are restricted to 2 colors at most. Any cursors are flattened to 2 colors making 
 them appear flat and ugly. This plugin circumvents that by displaying an image at the location of the cursor while 
