@@ -26,6 +26,11 @@ class LinuxCustomCursorOverlay extends Overlay
     private final LinuxCustomCursorPlugin plugin;
     private final ClientUI clientUI;
     private final ItemManager itemManager;
+    private BufferedImage cachedCustomImage;
+    private long customImageLastModified = 0;
+    private BufferedImage cachedWeaponImage;
+    private int cachedWeaponId = -1;
+    private LinuxCustomCursor lastSelectedCursor;
 
     @Setter
     private boolean disableOverlay;
@@ -77,49 +82,154 @@ class LinuxCustomCursorOverlay extends Overlay
     private BufferedImage updateCursorImg()
     {
         LinuxCustomCursor selectedCursor = config.selectedCursor();
+        
+        if (lastSelectedCursor != selectedCursor)
+        {
+            clearCacheForCursorChange(lastSelectedCursor, selectedCursor);
+            lastSelectedCursor = selectedCursor;
+        }
+        
         if (selectedCursor.getCursorImage() != null)
         {
             return selectedCursor.getCursorImage();
         }
         else if (selectedCursor == LinuxCustomCursor.CUSTOM_IMAGE)
         {
-            try
-            {
-                File customCursorFile = new File(RuneLite.RUNELITE_DIR, "cursor.png");
-                if (customCursorFile.exists())
-                {
-                    BufferedImage img;
-                    synchronized (ImageIO.class)
-                    {
-                        img = ImageIO.read(customCursorFile);
-                    }
-                    return img;
-                }
-            }
-            catch (Exception e)
-            {
-                log.error("Loading custom image file failed", e);
-                return null;
-            }
+            return getCachedCustomImage();
         }
         else if (selectedCursor == LinuxCustomCursor.EQUIPPED_WEAPON)
         {
-            ItemContainer playerEquipment = client.getItemContainer(InventoryID.EQUIPMENT);
-            if (playerEquipment == null) {
-                return null;
-            }
-
-            Item equippedWeapon = playerEquipment.getItem(EquipmentInventorySlot.WEAPON.getSlotIdx());
-            // should short circuit if null
-            if (equippedWeapon == null && equippedWeapon.getQuantity() <= 0)
-            {
-                return null;
-            }
-
-            return itemManager.getImage(equippedWeapon.getId());
+            return getCachedWeaponImage();
         }
         // if NONE then all above will be false, and we return null anyway
         return null;
+    }
+    
+    private BufferedImage getCachedCustomImage()
+    {
+        try
+        {
+            File customCursorFile = new File(RuneLite.RUNELITE_DIR, "cursor.png");
+            
+            // file doesn't exist, clear cache if needed
+            if (!customCursorFile.exists())
+            {
+                if (cachedCustomImage != null)
+                {
+                    cachedCustomImage.flush();
+                    cachedCustomImage = null;
+                    customImageLastModified = 0;
+                }
+                
+                return null;
+            }
+            
+            // check cursor last modified time to automatically reload on change
+            long fileLastModified = customCursorFile.lastModified();
+            
+            // check if the image needs to be reloaded
+            if (cachedCustomImage == null || fileLastModified != customImageLastModified)
+            {
+                // dispose of old image
+                if (cachedCustomImage != null)
+                {
+                    cachedCustomImage.flush();
+                }
+                
+                // load new image
+                synchronized (ImageIO.class)
+                {
+                    cachedCustomImage = ImageIO.read(customCursorFile);
+                }
+                
+                customImageLastModified = fileLastModified;
+                log.debug("Loaded custom cursor image from file");
+            }
+            
+            return cachedCustomImage;
+        }
+        catch (Exception e)
+        {
+            log.error("Loading custom image file failed", e);
+            
+            // clear cache on error
+            if (cachedCustomImage != null)
+            {
+                cachedCustomImage.flush();
+                cachedCustomImage = null;
+                customImageLastModified = 0;
+            }
+            
+            return null;
+        }
+    }
+    
+    private BufferedImage getCachedWeaponImage()
+    {
+        ItemContainer playerEquipment = client.getItemContainer(InventoryID.EQUIPMENT);
+        if (playerEquipment == null)
+        {
+            clearWeaponCache();
+            return null;
+        }
+        
+        Item equippedWeapon = playerEquipment.getItem(EquipmentInventorySlot.WEAPON.getSlotIdx());
+        
+        if (equippedWeapon == null || equippedWeapon.getQuantity() <= 0)
+        {
+            clearWeaponCache();
+            return null;
+        }
+        
+        int weaponId = equippedWeapon.getId();
+        
+        // check if the image needs to be reloaded
+        if (cachedWeaponImage == null || cachedWeaponId != weaponId)
+        {
+            // dispose of old image
+            if (cachedWeaponImage != null)
+            {
+                cachedWeaponImage.flush();
+            }
+            
+            cachedWeaponImage = itemManager.getImage(weaponId);
+            cachedWeaponId = weaponId;
+            log.debug("Cached weapon image for item ID: {}", weaponId);
+        }
+        
+        return cachedWeaponImage;
+    }
+    
+    private void clearWeaponCache()
+    {
+        if (cachedWeaponImage != null)
+        {
+            cachedWeaponImage.flush();
+            cachedWeaponImage = null;
+            cachedWeaponId = -1;
+        }
+    }
+    
+    private void clearCacheForCursorChange(LinuxCustomCursor oldCursor, LinuxCustomCursor newCursor)
+    {
+        // clear custom image cache if switching images
+        if (oldCursor == LinuxCustomCursor.CUSTOM_IMAGE && newCursor != LinuxCustomCursor.CUSTOM_IMAGE)
+        {
+            if (cachedCustomImage != null)
+            {
+                cachedCustomImage.flush();
+                cachedCustomImage = null;
+                customImageLastModified = 0;
+                log.debug("Cleared custom image cache on cursor change");
+            }
+        }
+        
+        // clear weapon image cache if switching weapon
+        if (oldCursor == LinuxCustomCursor.EQUIPPED_WEAPON && newCursor != LinuxCustomCursor.EQUIPPED_WEAPON)
+        {
+            clearWeaponCache();
+            log.debug("Cleared weapon image cache on cursor change");
+        }
     }
 
     private boolean mouseInsideBounds(Point mouseLoc)
