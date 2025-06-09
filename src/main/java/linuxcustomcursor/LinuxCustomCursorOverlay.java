@@ -12,6 +12,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.Point;
+import net.runelite.api.gameval.InventoryID;
 import net.runelite.client.RuneLite;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ClientUI;
@@ -32,6 +33,9 @@ class LinuxCustomCursorOverlay extends Overlay
     private long customImageLastModified = 0;
     private BufferedImage cachedWeaponImage;
     private int cachedWeaponId = -1;
+    private BufferedImage cachedMirrorX;
+    private BufferedImage cachedMirrorY;
+    private BufferedImage cachedMirrorXY;
     private LinuxCustomCursor lastSelectedCursor;
 
     @Setter
@@ -68,31 +72,25 @@ class LinuxCustomCursorOverlay extends Overlay
             return null;
         }
 
-        if (config.getMirrorCursorHorz())
+        BufferedImage finalImg;
+        if (config.getMirrorCursorVert() && !config.getMirrorCursorHorz())
         {
-            AffineTransform xform = new AffineTransform();
-            BufferedImage flipped = new BufferedImage(
-                    cursorImg.getWidth(), cursorImg.getHeight(), cursorImg.getType());
-            xform.concatenate(AffineTransform.getScaleInstance(-1, 1));
-            xform.concatenate(AffineTransform.getTranslateInstance(-cursorImg.getWidth(), 0));
-            AffineTransformOp op = new AffineTransformOp(xform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-            op.filter(cursorImg, flipped);
-            cursorImg = flipped;
+            finalImg = cachedMirrorY;
+        }
+        else if (config.getMirrorCursorHorz() && !config.getMirrorCursorVert())
+        {
+            finalImg = cachedMirrorX;
+        }
+        else if (config.getMirrorCursorHorz() && config.getMirrorCursorVert())
+        {
+            finalImg = cachedMirrorXY;
+        }
+        else
+        {
+            finalImg = cursorImg;
         }
 
-        if (config.getMirrorCursorVert())
-        {
-            AffineTransform xform = new AffineTransform();
-            BufferedImage flipped = new BufferedImage(
-                    cursorImg.getWidth(), cursorImg.getHeight(), cursorImg.getType());
-            xform.concatenate(AffineTransform.getScaleInstance(1, -1));
-            xform.concatenate(AffineTransform.getTranslateInstance(0, -cursorImg.getHeight()));
-            AffineTransformOp op = new AffineTransformOp(xform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-            op.filter(cursorImg, flipped);
-            cursorImg = flipped;
-        }
-
-        OverlayUtil.renderImageLocation(graphics, getAdjustedMousePoint(mouseLoc), cursorImg);
+        OverlayUtil.renderImageLocation(graphics, getAdjustedMousePoint(mouseLoc), finalImg);
 
         if (!config.debugEnableDrawSystemCursor())
         {
@@ -111,12 +109,14 @@ class LinuxCustomCursorOverlay extends Overlay
         
         if (lastSelectedCursor != selectedCursor)
         {
+            clearMirroredCursorCache();
             clearCacheForCursorChange(lastSelectedCursor, selectedCursor);
             lastSelectedCursor = selectedCursor;
         }
         
         if (selectedCursor.getCursorImage() != null)
         {
+            updateMirroredCursorCache(selectedCursor.getCursorImage());
             return selectedCursor.getCursorImage();
         }
         else if (selectedCursor == LinuxCustomCursor.CUSTOM_IMAGE)
@@ -129,6 +129,68 @@ class LinuxCustomCursorOverlay extends Overlay
         }
         // if NONE then all above will be false, and we return null anyway
         return null;
+    }
+
+    private void clearMirroredCursorCache()
+    {
+        // Clear out old images to avoid memory leaks
+        if (cachedMirrorX != null)
+        {
+            cachedMirrorX.flush();
+            cachedMirrorX = null;
+        }
+
+        if (cachedMirrorY != null)
+        {
+            cachedMirrorY.flush();
+            cachedMirrorY = null;
+        }
+
+        if (cachedMirrorXY != null)
+        {
+            cachedMirrorXY.flush();
+            cachedMirrorXY = null;
+        }
+    }
+
+    private void updateMirroredCursorCache(BufferedImage cursorImg)
+    {
+        if (cursorImg == null) {
+            log.debug("cursor null, not updating mirrored images.");
+            return;
+        }
+
+        if (cachedMirrorX == null)
+        {
+            cachedMirrorX = new BufferedImage(
+                    cursorImg.getWidth(), cursorImg.getHeight(), cursorImg.getType());
+            AffineTransform mirrorHorz = new AffineTransform();
+            mirrorHorz.concatenate(AffineTransform.getScaleInstance(-1, 1));
+            mirrorHorz.concatenate(AffineTransform.getTranslateInstance(-cursorImg.getWidth(), 0));
+            AffineTransformOp mirrorHorzOp = new AffineTransformOp(mirrorHorz, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+            mirrorHorzOp.filter(cursorImg, cachedMirrorX);
+        }
+        if (cachedMirrorY == null)
+        {
+            cachedMirrorY = new BufferedImage(
+                    cursorImg.getWidth(), cursorImg.getHeight(), cursorImg.getType());
+            AffineTransform mirrorVert = new AffineTransform();
+            mirrorVert.concatenate(AffineTransform.getScaleInstance(1, -1));
+            mirrorVert.concatenate(AffineTransform.getTranslateInstance(0, -cursorImg.getHeight()));
+            AffineTransformOp mirrorVertOp = new AffineTransformOp(mirrorVert, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+            mirrorVertOp.filter(cursorImg, cachedMirrorY);
+        }
+        if (cachedMirrorXY == null)
+        {
+            cachedMirrorXY = new BufferedImage(
+                    cursorImg.getWidth(), cursorImg.getHeight(), cursorImg.getType());
+            AffineTransform mirrorBoth = new AffineTransform();
+            mirrorBoth.concatenate(AffineTransform.getScaleInstance(-1, -1));
+            mirrorBoth.concatenate(AffineTransform.getTranslateInstance(-cursorImg.getWidth(), -cursorImg.getHeight()));
+            AffineTransformOp mirrorBothOp = new AffineTransformOp(mirrorBoth, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+            mirrorBothOp.filter(cursorImg, cachedMirrorXY);
+        }
+
     }
     
     private BufferedImage getCachedCustomImage()
@@ -145,6 +207,8 @@ class LinuxCustomCursorOverlay extends Overlay
                     cachedCustomImage.flush();
                     cachedCustomImage = null;
                     customImageLastModified = 0;
+                    // If file is deleted mid-gameplay?
+                    clearMirroredCursorCache();
                 }
                 
                 return null;
@@ -160,12 +224,14 @@ class LinuxCustomCursorOverlay extends Overlay
                 if (cachedCustomImage != null)
                 {
                     cachedCustomImage.flush();
+                    clearMirroredCursorCache();
                 }
                 
                 // load new image
                 synchronized (ImageIO.class)
                 {
                     cachedCustomImage = ImageIO.read(customCursorFile);
+                    updateMirroredCursorCache(cachedCustomImage);
                 }
                 
                 customImageLastModified = fileLastModified;
@@ -184,6 +250,7 @@ class LinuxCustomCursorOverlay extends Overlay
                 cachedCustomImage.flush();
                 cachedCustomImage = null;
                 customImageLastModified = 0;
+                clearMirroredCursorCache();
             }
             
             return null;
@@ -192,18 +259,20 @@ class LinuxCustomCursorOverlay extends Overlay
     
     private BufferedImage getCachedWeaponImage()
     {
-        ItemContainer playerEquipment = client.getItemContainer(InventoryID.EQUIPMENT);
+        ItemContainer playerEquipment = client.getItemContainer(InventoryID.WORN);
         if (playerEquipment == null)
         {
             clearWeaponCache();
+            clearMirroredCursorCache();
             return null;
         }
-        
+
         Item equippedWeapon = playerEquipment.getItem(EquipmentInventorySlot.WEAPON.getSlotIdx());
         
         if (equippedWeapon == null || equippedWeapon.getQuantity() <= 0)
         {
             clearWeaponCache();
+            clearMirroredCursorCache();
             return null;
         }
         
@@ -216,9 +285,11 @@ class LinuxCustomCursorOverlay extends Overlay
             if (cachedWeaponImage != null)
             {
                 cachedWeaponImage.flush();
+                clearMirroredCursorCache();
             }
             
             cachedWeaponImage = itemManager.getImage(weaponId);
+            updateMirroredCursorCache(cachedWeaponImage);
             cachedWeaponId = weaponId;
             log.debug("Cached weapon image for item ID: {}", weaponId);
         }
