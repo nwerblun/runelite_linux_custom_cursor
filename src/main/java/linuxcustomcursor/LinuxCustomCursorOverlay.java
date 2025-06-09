@@ -65,13 +65,6 @@ class LinuxCustomCursorOverlay extends Overlay
             clientUI.resetCursor();
             return null;
         }
-        
-        // if there is no custom image (such as no equipped weapon), fallback to system cursor
-        if (cursorImg == null)
-        {
-            clientUI.resetCursor();
-            return null;
-        }
 
         OverlayUtil.renderImageLocation(graphics, getAdjustedMousePoint(mouseLoc), cursorImg);
 
@@ -182,7 +175,7 @@ class LinuxCustomCursorOverlay extends Overlay
         
         Item equippedWeapon = playerEquipment.getItem(EquipmentInventorySlot.WEAPON.getSlotIdx());
         
-        if (equippedWeapon == null && equippedWeapon.getQuantity() <= 0)
+        if (equippedWeapon == null || equippedWeapon.getQuantity() <= 0)
         {
             clearWeaponCache();
             return null;
