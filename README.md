@@ -1,4 +1,7 @@
 # Changelog
+#### 1.0.5
+* Huge thanks to GitHub user 'rcnoob' for reminding me this plugin exists by fixing a massive memory leak that would eventually tank performance by caching images and flushing them properly.
+* Added a feature to mirror a cursor vertically/horizontally. Many more items can now be used as cursors.
 #### 1.0.4
 * Fixed a bug where logging out would keep your cursor invisible. Cursor should now properly reset until logged back in.
 #### 1.0.3

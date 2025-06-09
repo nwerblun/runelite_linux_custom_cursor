@@ -3,6 +3,8 @@ package linuxcustomcursor;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.AffineTransformOp;
+import java.awt.geom.AffineTransform;
 import java.io.File;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
@@ -64,6 +66,30 @@ class LinuxCustomCursorOverlay extends Overlay
         {
             clientUI.resetCursor();
             return null;
+        }
+
+        if (config.getMirrorCursorHorz())
+        {
+            AffineTransform xform = new AffineTransform();
+            BufferedImage flipped = new BufferedImage(
+                    cursorImg.getWidth(), cursorImg.getHeight(), cursorImg.getType());
+            xform.concatenate(AffineTransform.getScaleInstance(-1, 1));
+            xform.concatenate(AffineTransform.getTranslateInstance(-cursorImg.getWidth(), 0));
+            AffineTransformOp op = new AffineTransformOp(xform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+            op.filter(cursorImg, flipped);
+            cursorImg = flipped;
+        }
+
+        if (config.getMirrorCursorVert())
+        {
+            AffineTransform xform = new AffineTransform();
+            BufferedImage flipped = new BufferedImage(
+                    cursorImg.getWidth(), cursorImg.getHeight(), cursorImg.getType());
+            xform.concatenate(AffineTransform.getScaleInstance(1, -1));
+            xform.concatenate(AffineTransform.getTranslateInstance(0, -cursorImg.getHeight()));
+            AffineTransformOp op = new AffineTransformOp(xform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+            op.filter(cursorImg, flipped);
+            cursorImg = flipped;
         }
 
         OverlayUtil.renderImageLocation(graphics, getAdjustedMousePoint(mouseLoc), cursorImg);
