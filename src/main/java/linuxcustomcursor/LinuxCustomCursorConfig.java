@@ -44,13 +44,34 @@ public interface LinuxCustomCursorConfig extends Config
 	)
 	default boolean getMirrorCursorVert() { return false; }
 
+	@ConfigSection(
+			position = 5,
+			name = "Configuration",
+			description = "Options to tune the plugin"
+	)
+	String configSettingsSection = "Configuration";
+
+	@Range(
+			min = 0
+	)
 	@ConfigItem(
-		position = 5,
+		position = 6,
+		name = "Cursor Size Scaling",
+		keyName = "systemCursorScale",
+		description = "Factor to scale the size of the cursor. Numbers less than one will shrink the cursor. " +
+				"If the cursor becomes too small, it will be reset to 1x.",
+		section = configSettingsSection
+	)
+	@Units("x")
+	default double getScaleFactor() { return 1f; }
+
+	@ConfigItem(
+		position = 7,
 		name = "System Cursor Width",
 		keyName = "systemCursorWidth",
 		description = "Width of the 'image' used by your OS. " +
 				"Default system cursor shapes are generally square like 24x24 or 32x32",
-		section = generalSettingsSection
+		section = configSettingsSection
 	)
 	@Units("px")
 	default int getSystemCursorWidth()
@@ -59,12 +80,12 @@ public interface LinuxCustomCursorConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 6,
+		position = 8,
 		name = "System Cursor Height",
 		keyName = "systemCursorHeight",
 		description = "Height of the 'image' used by your OS. " +
 				"Default system cursor shapes are generally square like 24x24 or 32x32",
-		section = generalSettingsSection
+		section = configSettingsSection
 	)
 	@Units("px")
 	default int getSystemCursorHeight()
@@ -73,12 +94,12 @@ public interface LinuxCustomCursorConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 7,
+		position = 9,
 		name = "System Cursor Hotspot X Offset",
 		keyName = "systemCursorHotSpotXOffset",
 		description = "How far to the right is the 'click point' of your cursor. " +
 				"Generally around 10 pixels on a 24x24 cursor.",
-		section = generalSettingsSection
+		section = configSettingsSection
 	)
 	@Units("px")
 	default int getSystemCursorHotSpotXOffset()
@@ -87,12 +108,12 @@ public interface LinuxCustomCursorConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 8,
+		position = 10,
 		name = "System Cursor Hotspot Y Offset",
 		keyName = "systemCursorHotSpotYOffset",
 		description = "How far down from the top is the 'click point' of your cursor. " +
 				"Generally around 5 pixels on a 24x24 cursor.",
-		section = generalSettingsSection
+		section = configSettingsSection
 	)
 	@Units("px")
 	default int getSystemCursorHotSpotYOffset()
@@ -101,7 +122,7 @@ public interface LinuxCustomCursorConfig extends Config
 	}
 
 	@ConfigSection(
-		position = 9,
+		position = 11,
 		name = "Debug Options",
 		description = "Debug options, not meant to be used in most cases",
 		closedByDefault = true
@@ -109,7 +130,7 @@ public interface LinuxCustomCursorConfig extends Config
 	String debugSection = "Debug Section";
 
 	@ConfigItem(
-		position = 10,
+		position = 12,
 		name = "Also draw system cursor",
 		keyName = "drawSystemCursor",
 		description = "Used to check alignment of clickboxes. " +

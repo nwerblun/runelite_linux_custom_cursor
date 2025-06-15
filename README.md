@@ -1,4 +1,6 @@
 # Changelog
+#### 1.0.6
+* Added a scale feature to scale cursor size. Cursors could be unusable if your UI scaling is not 1x.
 #### 1.0.5
 * Huge thanks to GitHub user 'rcnoob' for reminding me this plugin exists by fixing a massive memory leak that would eventually tank performance by caching images and flushing them properly.
 * Added a feature to mirror a cursor vertically/horizontally. Many more items can now be used as cursors.
@@ -46,11 +48,15 @@ Cursors are generally a square image such as 24x24 with the "click spot" offset 
 in the horizontal/vertical directions respectively. Unfortunately, it's not really possible (as far as I know) to get 
 this information dynamically from Java, so the user will have to edit it themselves.
 
-![General Settings](src/main/resources/general-settings-readme.png)
-
+![Settings](src/main/resources/general-settings-readme.png)
+* Cursor: Your chosen cursor to display instead of the default.
+* Mirror Cursor Horizontally/Vertically: Mirrors the chosen image horizontally or vertically. Useful for the "equipped weapon" option which may not always point in the right direction.
+* Cursor Size Scaling: Makes your cursor larger or smaller by the chosen number. For example, a value of 2 would make the cursor 2x as large and 0.5 would be half as large.
 * System Cursor Width/Height: Get this from your system settings. It is almost 100% certainly a square shape. If you are uncertain, just increase/decrease them simultaneously until the click spot matches.
 * Cursor Hotspot X Offset: how far to the right from the top-left of the image should the click spot be. This number is usually around 10 pixels on a 24x24 cursor.
 * Cursor Hotspot Y Offset: how far down from the top-left of the image the click spot should be. This number is usually around 5 pixels on a 24x24 cursor.
+
+![]
 
 ### Debug Settings
 * As of now, just one option to also render the normal system cursor at the same time. This can be useful to help adjust the hotspot.

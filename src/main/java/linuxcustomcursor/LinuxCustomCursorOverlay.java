@@ -33,9 +33,11 @@ class LinuxCustomCursorOverlay extends Overlay
     private long customImageLastModified = 0;
     private BufferedImage cachedWeaponImage;
     private int cachedWeaponId = -1;
+    private double lastScaleFactor;
     private BufferedImage cachedMirrorX;
     private BufferedImage cachedMirrorY;
     private BufferedImage cachedMirrorXY;
+    private BufferedImage cachedScaledSelectedCursor;
     private LinuxCustomCursor lastSelectedCursor;
 
     @Setter
@@ -59,11 +61,21 @@ class LinuxCustomCursorOverlay extends Overlay
         this.clientUI = clientUI;
         this.itemManager = itemManager;
         disableOverlay = false;
+        lastScaleFactor = config.getScaleFactor();
     }
 
     @Override
     public Dimension render(Graphics2D graphics)
     {
+        if (lastScaleFactor != config.getScaleFactor())
+        {
+            // If scaling is changed, force an update of cached images
+            lastSelectedCursor = null;
+            customImageLastModified = 0;
+            cachedWeaponId = -1;
+            lastScaleFactor= config.getScaleFactor();
+        }
+
         BufferedImage cursorImg = updateCursorImg();
         Point mouseLoc = client.getMouseCanvasPosition();
         if (disableOverlay || mouseLoc == null || !mouseInsideBounds(mouseLoc) || cursorImg == null)
@@ -103,21 +115,50 @@ class LinuxCustomCursorOverlay extends Overlay
         return null;
     }
 
+    private BufferedImage scaleImg(BufferedImage img)
+    {
+        double factor = config.getScaleFactor();
+        int newWidth = (int) (factor * img.getWidth());
+        int newHeight = (int) (factor * img.getHeight());
+
+        // If the scaling factor makes the image 0 width/height just return a 1x version
+        if (newWidth <= 0)
+        {
+            newWidth = 1;
+        }
+        if (newHeight <= 0)
+        {
+            newHeight = 1;
+        }
+        BufferedImage res = new BufferedImage(newWidth, newHeight, img.getType());
+        AffineTransform scale = new AffineTransform();
+        scale.concatenate(AffineTransform.getScaleInstance(factor, factor));
+        AffineTransformOp scaleOp = new AffineTransformOp(scale, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        scaleOp.filter(img, res);
+        img.flush();
+        return res;
+    }
+
     private BufferedImage updateCursorImg()
     {
         LinuxCustomCursor selectedCursor = config.selectedCursor();
         
         if (lastSelectedCursor != selectedCursor)
         {
+            if (selectedCursor.getCursorImage() != null)
+            {
+                cachedScaledSelectedCursor = scaleImg(selectedCursor.getCursorImage());
+            }
             clearMirroredCursorCache();
             clearCacheForCursorChange(lastSelectedCursor, selectedCursor);
             lastSelectedCursor = selectedCursor;
         }
-        
+
+        // If not null, it must be a pre-provided image. Only custom/equipped have null images.
         if (selectedCursor.getCursorImage() != null)
         {
-            updateMirroredCursorCache(selectedCursor.getCursorImage());
-            return selectedCursor.getCursorImage();
+            updateMirroredCursorCache(cachedScaledSelectedCursor);
+            return cachedScaledSelectedCursor;
         }
         else if (selectedCursor == LinuxCustomCursor.CUSTOM_IMAGE)
         {
@@ -159,6 +200,7 @@ class LinuxCustomCursorOverlay extends Overlay
             log.debug("cursor null, not updating mirrored images.");
             return;
         }
+
 
         if (cachedMirrorX == null)
         {
@@ -230,7 +272,7 @@ class LinuxCustomCursorOverlay extends Overlay
                 // load new image
                 synchronized (ImageIO.class)
                 {
-                    cachedCustomImage = ImageIO.read(customCursorFile);
+                    cachedCustomImage = scaleImg(ImageIO.read(customCursorFile));
                     updateMirroredCursorCache(cachedCustomImage);
                 }
                 
@@ -288,7 +330,7 @@ class LinuxCustomCursorOverlay extends Overlay
                 clearMirroredCursorCache();
             }
             
-            cachedWeaponImage = itemManager.getImage(weaponId);
+            cachedWeaponImage = scaleImg(itemManager.getImage(weaponId));
             updateMirroredCursorCache(cachedWeaponImage);
             cachedWeaponId = weaponId;
             log.debug("Cached weapon image for item ID: {}", weaponId);
