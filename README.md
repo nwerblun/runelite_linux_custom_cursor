@@ -54,8 +54,6 @@ this information dynamically from Java, so the user will have to edit it themsel
 * Cursor Hotspot X Offset: how far to the right from the top-left of the image should the click spot be. This number is usually around 10 pixels on a 24x24 cursor.
 * Cursor Hotspot Y Offset: how far down from the top-left of the image the click spot should be. This number is usually around 5 pixels on a 24x24 cursor.
 
-![]
-
 ### Debug Settings
 * As of now, just one option to also render the normal system cursor at the same time. This can be useful to help adjust the hotspot.
 
