@@ -58,6 +58,8 @@ this information dynamically from Java, so the user will have to edit it themsel
 * As of now, just one option to also render the normal system cursor at the same time. This can be useful to help adjust the hotspot.
 
 # Changelog
+#### 1.1.1
+* Hopefully finally fixed performance dropping off a cliff after extended periods of play
 #### 1.1
 * Dragon Scimitar icon was loading in strangely. It was being pulled from the default RuneLite resources, but in the interest of time a new .png was provided to fix it
 * Several new cursors have been added. See the relevant section of the readme for the new options.
