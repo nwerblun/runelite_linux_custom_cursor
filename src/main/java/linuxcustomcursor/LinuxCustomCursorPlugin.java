@@ -8,6 +8,7 @@ import net.runelite.api.GameState;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -38,17 +39,25 @@ public class LinuxCustomCursorPlugin extends Plugin
 	@Inject
 	private ClientUI clientUI;
 
+    @Inject
+    private KeyManager keyManager;
+
+    @Inject
+    private LinuxCustomCursorHotkeyListener listener;
 
 	@Override
 	protected void startUp() throws Exception
 	{
 		overlayManager.add(overlay);
+        keyManager.registerKeyListener(listener);
+        listener.setOverlay(overlay);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
 		overlayManager.remove(overlay);
+        keyManager.unregisterKeyListener(listener);
 	}
 
 	@Provides

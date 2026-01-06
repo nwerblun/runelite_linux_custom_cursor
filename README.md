@@ -1,4 +1,4 @@
-# Linux Custom Cursor
+.# Linux Custom Cursor
 Java has an issue where all cursors are restricted to 2 colors at most. Any cursors are flattened to 2 colors making 
 them appear flat and ugly. This plugin circumvents that by displaying an image at the location of the cursor while 
 making the cursor transparent. It technically works on all platforms, but other platforms probably don't need it.
@@ -58,6 +58,10 @@ this information dynamically from Java, so the user will have to edit it themsel
 * As of now, just one option to also render the normal system cursor at the same time. This can be useful to help adjust the hotspot.
 
 # Changelog
+#### 1.2
+* Modified behavior to disable the overlay when the drag hotkey (default is left alt, set in the 'RuneLite' settings) 
+is pressed. There was a report that the plugin was interfering with the ability
+to move UI elements around, so I am adding this as a fix.
 #### 1.1.1
 * Hopefully finally fixed performance dropping off a cliff after extended periods of play
 #### 1.1
