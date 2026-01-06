@@ -1,4 +1,4 @@
-.# Linux Custom Cursor
+# Linux Custom Cursor
 Java has an issue where all cursors are restricted to 2 colors at most. Any cursors are flattened to 2 colors making 
 them appear flat and ugly. This plugin circumvents that by displaying an image at the location of the cursor while 
 making the cursor transparent. It technically works on all platforms, but other platforms probably don't need it.
